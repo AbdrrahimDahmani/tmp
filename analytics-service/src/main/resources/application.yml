@@ -1,0 +1,33 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: analytics-service
+  cloud:
+    function:
+      definition: messageAnalytics
+    stream:
+      bindings:
+        messageAnalytics-in-0:
+          destination: raw-messages
+          content-type: application/json
+        messageAnalytics-out-0:
+          destination: analytics-results
+          content-type: text/plain
+      kafka:
+        streams:
+          binder:
+            brokers: ${KAFKA_BROKERS:localhost:9092}
+            configuration:
+              default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+              default.value.serde: org.springframework.kafka.support.serializer.JsonSerde
+          bindings:
+            messageAnalytics-in-0:
+              consumer:
+                application-id: analytics-service
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

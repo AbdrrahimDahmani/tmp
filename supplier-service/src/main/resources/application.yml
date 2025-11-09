@@ -1,0 +1,24 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: supplier-service
+  cloud:
+    function:
+      definition: heartbeatSupplier
+    stream:
+      bindings:
+        heartbeatSupplier-out-0:
+          destination: raw-messages
+          content-type: application/json
+      poller:
+        fixed-delay: 5000
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
