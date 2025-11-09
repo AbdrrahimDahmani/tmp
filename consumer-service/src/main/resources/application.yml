@@ -1,0 +1,23 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: consumer-service
+  cloud:
+    function:
+      definition: messageLogger
+    stream:
+      bindings:
+        messageLogger-in-0:
+          destination: raw-messages
+          group: raw-message-consumers
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

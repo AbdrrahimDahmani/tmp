@@ -1,0 +1,20 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: producer-service
+  cloud:
+    stream:
+      bindings:
+        producer-out-0:
+          destination: raw-messages
+          content-type: application/json
+      kafka:
+        binder:
+          brokers: ${KAFKA_BROKERS:localhost:9092}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

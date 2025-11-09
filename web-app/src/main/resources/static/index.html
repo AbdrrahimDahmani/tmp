@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kafka Stream Analytics Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; background: #f7f7f7; }
+        h1 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+        th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: left; }
+        th { background: #4CAF50; color: white; }
+        tbody tr:nth-child(even) { background: #f2f2f2; }
+        .status { margin-top: 1rem; font-style: italic; }
+    </style>
+</head>
+<body>
+<h1>Real-time Analytics</h1>
+<p>Messages are aggregated in 30 second tumbling windows. Keep this page open to watch updates as they arrive.</p>
+<div class="status" id="status">Connecting to analytics stream...</div>
+<table>
+    <thead>
+    <tr>
+        <th>Type</th>
+        <th>Count</th>
+        <th>Window Start</th>
+        <th>Window End</th>
+    </tr>
+    </thead>
+    <tbody id="analytics-table">
+    </tbody>
+</table>
+<script>
+    const statusLabel = document.getElementById('status');
+    const tableBody = document.getElementById('analytics-table');
+    const source = new EventSource('/api/analytics/stream');
+
+    source.onopen = () => {
+        statusLabel.textContent = 'Connected';
+    };
+
+    source.onerror = () => {
+        statusLabel.textContent = 'Connection lost, retrying...';
+    };
+
+    source.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${data.type}</td>
+            <td>${data.count}</td>
+            <td>${new Date(data.windowStart).toLocaleTimeString()}</td>
+            <td>${new Date(data.windowEnd).toLocaleTimeString()}</td>
+        `;
+        tableBody.insertBefore(row, tableBody.firstChild);
+        statusLabel.textContent = 'Receiving updates';
+        while (tableBody.children.length > 20) {
+            tableBody.removeChild(tableBody.lastChild);
+        }
+    };
+</script>
+</body>
+</html>
